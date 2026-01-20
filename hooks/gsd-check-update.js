@@ -7,14 +7,33 @@ const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
 
-const homeDir = os.homedir();
+function expandTilde(inputPath) {
+  if (inputPath && inputPath.startsWith('~/')) {
+    return path.join(os.homedir(), inputPath.slice(2));
+  }
+  return inputPath;
+}
+
+function resolveConfigDir(cwd) {
+  const localClaudeDir = path.join(cwd, '.claude');
+  if (fs.existsSync(path.join(localClaudeDir, 'get-shit-done'))) {
+    return localClaudeDir;
+  }
+  const envDir = expandTilde(process.env.CLAUDE_CONFIG_DIR);
+  if (envDir && fs.existsSync(envDir)) {
+    return envDir;
+  }
+  return path.join(os.homedir(), '.claude');
+}
+
 const cwd = process.cwd();
-const cacheDir = path.join(homeDir, '.claude', 'cache');
+const claudeDir = resolveConfigDir(cwd);
+const cacheDir = path.join(claudeDir, 'cache');
 const cacheFile = path.join(cacheDir, 'gsd-update-check.json');
 
 // VERSION file locations (check project first, then global)
 const projectVersionFile = path.join(cwd, '.claude', 'get-shit-done', 'VERSION');
-const globalVersionFile = path.join(homeDir, '.claude', 'get-shit-done', 'VERSION');
+const globalVersionFile = path.join(claudeDir, 'get-shit-done', 'VERSION');
 
 // Ensure cache directory exists
 if (!fs.existsSync(cacheDir)) {

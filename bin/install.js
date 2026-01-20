@@ -381,11 +381,16 @@ function install(isGlobal) {
   // Configure statusline and hooks in settings.json
   const settingsPath = path.join(claudeDir, 'settings.json');
   const settings = cleanupOrphanedHooks(readSettings(settingsPath));
+  const hasCustomConfigDir = Boolean(configDir);
   const statuslineCommand = isGlobal
-    ? 'node "$HOME/.claude/hooks/statusline.js"'
+    ? (hasCustomConfigDir
+      ? `CLAUDE_CONFIG_DIR="${claudeDir}" node "${claudeDir}/hooks/statusline.js"`
+      : 'node "$HOME/.claude/hooks/statusline.js"')
     : 'node .claude/hooks/statusline.js';
   const updateCheckCommand = isGlobal
-    ? 'node "$HOME/.claude/hooks/gsd-check-update.js"'
+    ? (hasCustomConfigDir
+      ? `CLAUDE_CONFIG_DIR="${claudeDir}" node "${claudeDir}/hooks/gsd-check-update.js"`
+      : 'node "$HOME/.claude/hooks/gsd-check-update.js"')
     : 'node .claude/hooks/gsd-check-update.js';
 
   // Configure SessionStart hook for update checking
