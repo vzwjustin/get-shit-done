@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+const { resolveConfigDir } = require('./utils');
 
 // Read JSON from stdin
 let input = '';
@@ -42,8 +42,8 @@ process.stdin.on('end', () => {
 
     // Current task from todos
     let task = '';
-    const homeDir = os.homedir();
-    const todosDir = path.join(homeDir, '.claude', 'todos');
+    const claudeDir = resolveConfigDir(dir);
+    const todosDir = path.join(claudeDir, 'todos');
     if (session && fs.existsSync(todosDir)) {
       const files = fs.readdirSync(todosDir)
         .filter(f => f.startsWith(session) && f.includes('-agent-') && f.endsWith('.json'))
@@ -61,7 +61,7 @@ process.stdin.on('end', () => {
 
     // GSD update available?
     let gsdUpdate = '';
-    const cacheFile = path.join(homeDir, '.claude', 'cache', 'gsd-update-check.json');
+    const cacheFile = path.join(claudeDir, 'cache', 'gsd-update-check.json');
     if (fs.existsSync(cacheFile)) {
       try {
         const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));

@@ -4,17 +4,17 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { spawn } = require('child_process');
+const { resolveConfigDir } = require('./utils');
 
-const homeDir = os.homedir();
 const cwd = process.cwd();
-const cacheDir = path.join(homeDir, '.claude', 'cache');
+const claudeDir = resolveConfigDir(cwd);
+const cacheDir = path.join(claudeDir, 'cache');
 const cacheFile = path.join(cacheDir, 'gsd-update-check.json');
 
 // VERSION file locations (check project first, then global)
 const projectVersionFile = path.join(cwd, '.claude', 'get-shit-done', 'VERSION');
-const globalVersionFile = path.join(homeDir, '.claude', 'get-shit-done', 'VERSION');
+const globalVersionFile = path.join(claudeDir, 'get-shit-done', 'VERSION');
 
 // Ensure cache directory exists
 if (!fs.existsSync(cacheDir)) {
