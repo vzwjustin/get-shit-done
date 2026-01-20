@@ -6,6 +6,25 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+function expandTilde(inputPath) {
+  if (inputPath && inputPath.startsWith('~/')) {
+    return path.join(os.homedir(), inputPath.slice(2));
+  }
+  return inputPath;
+}
+
+function resolveConfigDir(cwd) {
+  const localClaudeDir = path.join(cwd, '.claude');
+  if (fs.existsSync(path.join(localClaudeDir, 'get-shit-done'))) {
+    return localClaudeDir;
+  }
+  const envDir = expandTilde(process.env.CLAUDE_CONFIG_DIR);
+  if (envDir && fs.existsSync(envDir)) {
+    return envDir;
+  }
+  return path.join(os.homedir(), '.claude');
+}
+
 // Read JSON from stdin
 let input = '';
 process.stdin.setEncoding('utf8');
@@ -42,8 +61,8 @@ process.stdin.on('end', () => {
 
     // Current task from todos
     let task = '';
-    const homeDir = os.homedir();
-    const todosDir = path.join(homeDir, '.claude', 'todos');
+    const claudeDir = resolveConfigDir(dir);
+    const todosDir = path.join(claudeDir, 'todos');
     if (session && fs.existsSync(todosDir)) {
       const files = fs.readdirSync(todosDir)
         .filter(f => f.startsWith(session) && f.includes('-agent-') && f.endsWith('.json'))
@@ -61,7 +80,7 @@ process.stdin.on('end', () => {
 
     // GSD update available?
     let gsdUpdate = '';
-    const cacheFile = path.join(homeDir, '.claude', 'cache', 'gsd-update-check.json');
+    const cacheFile = path.join(claudeDir, 'cache', 'gsd-update-check.json');
     if (fs.existsSync(cacheFile)) {
       try {
         const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
