@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+const { resolveConfigDir } = require('./utils');
 
 function expandTilde(inputPath) {
   if (inputPath && inputPath.startsWith('~/')) {
